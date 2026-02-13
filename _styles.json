@@ -1,0 +1,56 @@
+{
+  "default": "medieval-warm",
+  "styles": {
+    "medieval-warm": {
+      "name": "Medieval Warm",
+      "description": "Warm earthy tones — cozy village atmosphere with golden highlights",
+      "font": {
+        "family": "Merriweather",
+        "url": "https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap",
+        "fallback": "serif"
+      },
+      "palette": {
+        "bg": "#1a1a2e",
+        "canvas-bg": "#2d4a3e",
+        "text": "#e8e8e8",
+        "accent": "#8b4513",
+        "accent2": "#228b22",
+        "ui-border": "#4a3e2d"
+      }
+    },
+    "nordic-cold": {
+      "name": "Nordic Cold",
+      "description": "Cool blues and grays — harsh northern settlement in the snow",
+      "font": {
+        "family": "Cinzel",
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap",
+        "fallback": "serif"
+      },
+      "palette": {
+        "bg": "#0d1b2a",
+        "canvas-bg": "#1b263b",
+        "text": "#e0e1dd",
+        "accent": "#415a77",
+        "accent2": "#778da9",
+        "ui-border": "#0d1b2a"
+      }
+    },
+    "desert-oasis": {
+      "name": "Desert Oasis",
+      "description": "Bright sandy yellows — sun-baked settlement around an oasis",
+      "font": {
+        "family": "Philosopher",
+        "url": "https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&display=swap",
+        "fallback": "sans-serif"
+      },
+      "palette": {
+        "bg": "#2b1d0e",
+        "canvas-bg": "#c4a265",
+        "text": "#2b1d0e",
+        "accent": "#cd853f",
+        "accent2": "#8b4513",
+        "ui-border": "#daa520"
+      }
+    }
+  }
+}

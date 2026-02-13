@@ -1,0 +1,43 @@
+{
+  "style": "Medieval city builder — earthy tones, stone and wood textures, pastoral pixel art, warm lighting",
+  "gridSize": "8x8 (buildings rendered as 32x32 on 40px grid tiles)",
+  "palette": {
+    "grass": "#6b8e23",
+    "forest": "#228b22",
+    "hills": "#8b7355",
+    "water": "#4682b4",
+    "ruins": "#696969",
+    "road": "#a0926b",
+    "building-wood": "#8b4513",
+    "building-stone": "#708090",
+    "building-roof": "#a0522d",
+    "gold": "#ffd700",
+    "food": "#ff8c00",
+    "wood": "#8b4513",
+    "stone": "#708090",
+    "population": "#ffffff",
+    "happiness": "#ff69b4",
+    "ui-bg": "#2d4a3e",
+    "ui-text": "#e8e8e8",
+    "ui-accent": "#ffd700",
+    "danger": "#ff4444"
+  },
+  "categories": {
+    "terrain": {
+      "sprites": ["grass", "forest", "hills", "water", "ruins"],
+      "desc": "Terrain tiles — grass plains, dense forest, rocky hills, river water, crumbling ancient ruins"
+    },
+    "buildings": {
+      "sprites": ["hut", "farm", "lumberMill", "quarry", "market", "warehouse", "tavern", "chapel", "watchtower", "townHall", "library", "walls"],
+      "desc": "Building types — wooden huts, thatched farms, stone quarries, market stalls, tall watchtowers, grand town hall"
+    },
+    "ui": {
+      "sprites": ["cursor", "iconGold", "iconFood", "iconWood", "iconStone", "iconPop", "iconHappy"],
+      "desc": "UI elements — tile selection cursor, resource icons for HUD"
+    },
+    "effects": {
+      "sprites": ["construction", "harvest", "smoke", "sparkle", "danger"],
+      "desc": "Visual effects — construction dust, harvest glow, chimney smoke, celebration sparkles, danger flash"
+    }
+  }
+}
