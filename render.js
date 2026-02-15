@@ -180,9 +180,9 @@
 
             // Right wall (thin shadow)
             if (h > 0) {
-              FA.draw.withAlpha(0.7, function() {
-                FA.draw.rect(tx + ts, ty, 1, tileW + h, tR.shadowColors[tile.terrain] || '#222');
-              });
+              FA.draw.pushAlpha(0.7);
+              FA.draw.rect(tx + ts, ty, 1, tileW + h, tR.shadowColors[tile.terrain] || '#222');
+              FA.draw.popAlpha();
             }
 
             // 3D gradient highlight
