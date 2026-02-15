@@ -3,7 +3,7 @@
 
 var SPRITE_DEFS = {
   "terrain": {
-    "grass": {
+    "plains": {
       "w": 8,
       "h": 8,
       "palette": {

@@ -113,6 +113,22 @@
     success: '#44cc44'
   });
 
+  FA.register('config', 'terrainRender', {
+    heights: { water: 0, plains: 5, forest: 5, hills: 8, ruins: 10 },
+    shadowColors: {
+      water: 'rgba(30, 64, 175, 0.7)',
+      plains: 'rgb(36, 73, 22)',
+      forest: 'rgb(36, 73, 22)',
+      hills: 'rgba(161, 98, 7, 0.7)',
+      ruins: 'rgba(75, 85, 99, 0.7)'
+    },
+    tileset: {
+      src: 'terrainTiles.gif',
+      srcTileSize: 64,
+      rows: { water: 0, plains: 1, forest: 1, hills: 3, ruins: 4 }
+    }
+  });
+
   // =====================
   // TERRAIN TYPES
   // =====================
