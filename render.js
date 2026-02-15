@@ -7,6 +7,11 @@
   var colors = FA.lookup('config', 'colors');
   var layouts = FA.lookup('config', 'layouts');
   var L = layouts[cfg.layout] || layouts.classic;
+  var tR = FA.lookup('config', 'terrainRender');
+
+  // Load tileset image
+  var _tileset = new Image();
+  _tileset.src = tR.tileset.src;
 
   var BUILD_MENU = [
     'hut', 'farm', 'lumberMill', 'quarry', 'market',
@@ -72,9 +77,9 @@
         var state = FA.getState();
         if (state.screen !== 'victory' && state.screen !== 'defeat') return;
 
-        FA.draw.withAlpha(0.85, function() {
-          FA.draw.rect(0, 0, cfg.canvasWidth, cfg.canvasHeight, '#000');
-        });
+        FA.draw.pushAlpha(0.85);
+        FA.draw.rect(0, 0, cfg.canvasWidth, cfg.canvasHeight, '#000');
+        FA.draw.popAlpha();
 
         var isVictory = state.screen === 'victory';
         var title = isVictory ? 'YOUR LEGACY ENDURES' : 'THE SETTLEMENT FALLS';
@@ -124,31 +129,70 @@
       FA.addLayer('terrain', function() {
         var state = FA.getState();
         if (state.screen !== 'playing') return;
-        var hs = cfg.heightScale || 6;
+        var ctx = FA.getCtx();
+        var ts = cfg.tileSize;
+        var srcTs = tR.tileset.srcTileSize;
+        var tilesetReady = _tileset.complete && _tileset.naturalWidth > 0;
 
         for (var y = 0; y < state.grid.length; y++) {
           for (var x = 0; x < state.grid[y].length; x++) {
             var tile = state.grid[y][x];
-            var tx = L.grid.x + x * cfg.tileSize;
-            var ho = -Math.round(tile.height * hs);
-            var ty = L.grid.y + y * cfg.tileSize + ho;
+            var tx = L.grid.x + x * ts;
+            var baseY = L.grid.y + y * ts;
+            var h = tR.heights[tile.terrain] || 0;
+            var ty = baseY - h;
 
             if (!tile.discovered) {
-              FA.draw.rect(tx, ty, cfg.tileSize, cfg.tileSize, '#111');
+              FA.draw.rect(tx, baseY, ts, ts, '#111');
               continue;
             }
 
             var tDef = FA.lookup('terrain', tile.terrain);
-            FA.draw.rect(tx, ty, cfg.tileSize, cfg.tileSize, tDef.color);
+            var tileW = ts - 1;
 
-            if (ho < 0) {
-              FA.draw.rect(tx, ty + cfg.tileSize, cfg.tileSize, -ho, _darken(tDef.color, 0.6));
+            // Tile surface — from tileset image
+            if (tilesetReady) {
+              var row = tR.tileset.rows[tile.terrain];
+              if (row !== undefined) {
+                var variant = tile.variant % 3;
+                ctx.drawImage(
+                  _tileset,
+                  variant * srcTs, row * srcTs, srcTs, srcTs,
+                  tx + 1, ty, tileW, tileW
+                );
+              } else {
+                FA.draw.rect(tx + 1, ty, tileW, tileW, tDef.color);
+              }
+            } else {
+              FA.draw.rect(tx + 1, ty, tileW, tileW, tDef.color);
             }
 
-            FA.draw.strokeRect(tx, ty, cfg.tileSize, cfg.tileSize, 'rgba(0,0,0,0.15)', 1);
+            // Forest: tree sprite overlay on grass tile
+            if (tile.terrain === 'forest') {
+              FA.draw.sprite('terrain', 'forest', tx + 4, ty + 2, ts - 8, 'T', '#1a6b1a', tile.variant);
+            }
 
-            if (!tile.building) {
-              FA.draw.sprite('terrain', tile.terrain, tx + 12, ty + 12, 16, tDef.char, tDef.color === '#228b22' ? '#1a6b1a' : '#555', tile.variant);
+            // Front wall (depth shadow below tile)
+            if (h > 0) {
+              var sc = tR.shadowColors[tile.terrain] || _darken(tDef.color, 0.6);
+              FA.draw.rect(tx + 1, ty + tileW, tileW, h, sc);
+            }
+
+            // Right wall (thin shadow)
+            if (h > 0) {
+              FA.draw.withAlpha(0.7, function() {
+                FA.draw.rect(tx + ts, ty, 1, tileW + h, tR.shadowColors[tile.terrain] || '#222');
+              });
+            }
+
+            // 3D gradient highlight
+            if (h > 0) {
+              var grad = ctx.createLinearGradient(tx + 1, ty, tx + ts, ty + tileW);
+              grad.addColorStop(0, 'rgba(255,255,255,0.1)');
+              grad.addColorStop(0.5, 'rgba(255,255,255,0)');
+              grad.addColorStop(1, 'rgba(0,0,0,0.1)');
+              ctx.fillStyle = grad;
+              ctx.fillRect(tx + 1, ty, tileW, tileW);
             }
           }
         }
@@ -160,24 +204,22 @@
       FA.addLayer('buildings', function() {
         var state = FA.getState();
         if (state.screen !== 'playing') return;
-        var hs = cfg.heightScale || 6;
-
         for (var y = 0; y < state.grid.length; y++) {
           for (var x = 0; x < state.grid[y].length; x++) {
             var tile = state.grid[y][x];
             if (!tile.building || !tile.discovered) continue;
 
-            var ho = -Math.round(tile.height * hs);
+            var h = tR.heights[tile.terrain] || 0;
             var tx = L.grid.x + x * cfg.tileSize + 4;
-            var ty = L.grid.y + y * cfg.tileSize + 4 + ho;
+            var ty = L.grid.y + y * cfg.tileSize - h + 4;
             var b = tile.building;
 
             FA.draw.sprite('buildings', b.id, tx, ty, 32, b.def.char, b.def.color, 0);
 
             if (!b.active && b.def.populationRequired > 0) {
-              FA.draw.withAlpha(0.5, function() {
-                FA.draw.rect(tx, ty, 32, 32, '#000');
-              });
+              FA.draw.pushAlpha(0.5);
+              FA.draw.rect(tx, ty, 32, 32, '#000');
+              FA.draw.popAlpha();
               FA.draw.text('!', tx + 16, ty + 10, { color: '#f44', size: 12, bold: true, align: 'center' });
             }
           }
@@ -191,12 +233,11 @@
         var state = FA.getState();
         if (state.screen !== 'playing') return;
         if (!state.selectedTile) return;
-        var hs = cfg.heightScale || 6;
 
         var st = state.selectedTile;
-        var ho = -Math.round(st.height * hs);
+        var h = tR.heights[st.terrain] || 0;
         var tx = L.grid.x + st.x * cfg.tileSize;
-        var ty = L.grid.y + st.y * cfg.tileSize + ho;
+        var ty = L.grid.y + st.y * cfg.tileSize - h;
         FA.draw.strokeRect(tx + 1, ty + 1, cfg.tileSize - 2, cfg.tileSize - 2, colors.selected, 3);
       }, 10);
 
@@ -215,12 +256,11 @@
 
         if (gy >= cfg.gridHeight || gx >= cfg.gridWidth || gx < 0 || gy < 0) return;
 
-        var hs = cfg.heightScale || 6;
         var tile = state.grid[gy] && state.grid[gy][gx];
-        var ho = tile ? -Math.round(tile.height * hs) : 0;
+        var h = tile ? (tR.heights[tile.terrain] || 0) : 0;
         var check = City.canPlace(state.buildMode, gx, gy, state);
         var cursorColor = check.valid ? 'rgba(50,255,50,0.35)' : 'rgba(255,50,50,0.35)';
-        FA.draw.rect(L.grid.x + gx * cfg.tileSize, L.grid.y + gy * cfg.tileSize + ho, cfg.tileSize, cfg.tileSize, cursorColor);
+        FA.draw.rect(L.grid.x + gx * cfg.tileSize, L.grid.y + gy * cfg.tileSize - h, cfg.tileSize, cfg.tileSize, cursorColor);
 
         if (!check.valid) {
           FA.draw.text(check.reason, mouse.x, mouse.y - 12, {
@@ -241,12 +281,12 @@
         var alpha = FA.clamp(msg.life / 1000, 0, 1);
         var barW = L.grid.w || cfg.canvasWidth;
 
-        FA.draw.withAlpha(alpha, function() {
-          FA.draw.rect(L.grid.x, L.grid.y, barW, 44, 'rgba(0,0,0,0.75)');
-          FA.draw.text(msg.text, L.grid.x + barW / 2, L.grid.y + 16, {
-            color: msg.color, size: 14, align: 'center'
-          });
+        FA.draw.pushAlpha(alpha);
+        FA.draw.rect(L.grid.x, L.grid.y, barW, 44, 'rgba(0,0,0,0.75)');
+        FA.draw.text(msg.text, L.grid.x + barW / 2, L.grid.y + 16, {
+          color: msg.color, size: 14, align: 'center'
         });
+        FA.draw.popAlpha();
       }, 20);
 
       // =====================
