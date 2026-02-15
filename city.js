@@ -5,6 +5,41 @@
   var FA = window.FA;
   var cfg = FA.lookup('config', 'game');
 
+  // =====================
+  // PERLIN NOISE
+  // =====================
+  var _perm = [];
+  function _initNoise(seed) {
+    _perm = [];
+    var s = seed || 42;
+    for (var i = 0; i < 256; i++) {
+      s = (s * 16807) % 2147483647;
+      _perm.push(s & 255);
+    }
+  }
+  function _hash2(ix, iy) {
+    return _perm[(_perm[ix & 255] + iy) & 255] / 255;
+  }
+  function _noise2D(x, y) {
+    var ix = Math.floor(x), iy = Math.floor(y);
+    var fx = x - ix, fy = y - iy;
+    fx = fx * fx * (3 - 2 * fx);
+    fy = fy * fy * (3 - 2 * fy);
+    var a = _hash2(ix, iy), b = _hash2(ix + 1, iy);
+    var c = _hash2(ix, iy + 1), d = _hash2(ix + 1, iy + 1);
+    return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+  }
+  function perlin2D(x, y, octaves, persistence) {
+    var total = 0, maxVal = 0, amp = 1, freq = 1;
+    for (var i = 0; i < (octaves || 3); i++) {
+      total += _noise2D(x * freq, y * freq) * amp;
+      maxVal += amp;
+      amp *= (persistence || 0.5);
+      freq *= 2;
+    }
+    return total / maxVal;
+  }
+
   var City = {
 
     // =====================
@@ -12,7 +47,10 @@
     // =====================
 
     initGrid: function(w, h) {
+      _initNoise(FA.rand(1, 999999));
       var grid = [];
+      var noiseScale = 0.18;
+
       // Place ruins positions first
       var ruinsCount = FA.rand(1, 3);
       var ruinsPositions = [];
@@ -23,28 +61,33 @@
         });
       }
 
-      // Place hill clusters
-      var hillCenters = [];
-      var hillCount = FA.rand(2, 4);
-      for (var hc = 0; hc < hillCount; hc++) {
-        hillCenters.push({
-          x: FA.rand(3, w - 3),
-          y: FA.rand(3, h - 3)
-        });
-      }
-
       for (var y = 0; y < h; y++) {
         var row = [];
         for (var x = 0; x < w; x++) {
-          var terrain = this._pickTerrain(x, y, w, h, ruinsPositions, hillCenters);
+          var height = perlin2D(x * noiseScale, y * noiseScale, 4, 0.5);
+          var terrain = this._terrainFromHeight(height);
+
+          // Check ruins
+          for (var ri = 0; ri < ruinsPositions.length; ri++) {
+            if (x === ruinsPositions[ri].x && y === ruinsPositions[ri].y) {
+              terrain = 'ruins';
+              break;
+            }
+          }
+
           // Start area (center 5x4) is always plains and discovered
           var isStartArea = Math.abs(x - Math.floor(w / 2)) <= 2 && Math.abs(y - Math.floor(h / 2)) <= 2;
-          if (isStartArea) terrain = 'plains';
+          if (isStartArea) {
+            terrain = 'plains';
+            height = FA.clamp(height, 0.3, 0.55);
+          }
 
           row.push({
             x: x,
             y: y,
             terrain: terrain,
+            height: height,
+            variant: (x * 7 + y * 13) % 3,
             building: null,
             discovered: isStartArea || FA.rand(0, 100) < 70
           });
@@ -54,36 +97,11 @@
       return grid;
     },
 
-    _pickTerrain: function(x, y, w, h, ruinsPositions, hillCenters) {
-      // Water on edges
-      if (x === 0 || x === w - 1 || y === 0 || y === h - 1) {
-        return FA.rand(0, 100) < 40 ? 'water' : 'plains';
-      }
-      // Water river (horizontal middle-ish)
-      if (y === Math.floor(h * 0.3) && x > 2 && x < w - 3 && FA.rand(0, 100) < 30) {
-        return 'water';
-      }
-
-      // Check ruins
-      for (var r = 0; r < ruinsPositions.length; r++) {
-        if (x === ruinsPositions[r].x && y === ruinsPositions[r].y) return 'ruins';
-      }
-
-      // Check hills (cluster around centers)
-      for (var hc = 0; hc < hillCenters.length; hc++) {
-        var dx = x - hillCenters[hc].x;
-        var dy = y - hillCenters[hc].y;
-        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && FA.rand(0, 100) < 60) return 'hills';
-      }
-
-      // Forest around edges and scattered
-      var distFromCenter = Math.sqrt(
-        Math.pow(x - w / 2, 2) + Math.pow(y - h / 2, 2)
-      );
-      if (distFromCenter > 6 && FA.rand(0, 100) < 25) return 'forest';
-      if (FA.rand(0, 100) < 8) return 'forest';
-
-      return 'plains';
+    _terrainFromHeight: function(h) {
+      if (h < 0.22) return 'water';
+      if (h < 0.62) return 'plains';
+      if (h < 0.78) return 'forest';
+      return 'hills';
     },
 
     getTile: function(grid, x, y) {

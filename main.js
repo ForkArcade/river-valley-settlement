@@ -5,6 +5,8 @@
   var FA = window.FA;
   var cfg = FA.lookup('config', 'game');
   var colors = FA.lookup('config', 'colors');
+  var layouts = FA.lookup('config', 'layouts');
+  var L = layouts[cfg.layout] || layouts.classic;
 
   FA.initCanvas('game', cfg.canvasWidth, cfg.canvasHeight);
 
@@ -44,44 +46,14 @@
     // --- Playing ---
     if (state.screen !== 'playing') return;
 
-    // Choice dialog (modal — blocks all other input)
-    if (state.choiceDialog && state._choiceBounds) {
-      for (var i = 0; i < state._choiceBounds.length; i++) {
-        var cb = state._choiceBounds[i];
-        if (mx >= cb.x && mx <= cb.x + cb.w && my >= cb.y && my <= cb.y + cb.h) {
-          Events.resolveChoice(state.choiceDialog.id, i, state);
-          return;
-        }
-      }
-      return; // Block clicks outside dialog
-    }
-
-    // End Turn button
-    if (state._endTurnBtn) {
-      var btn = state._endTurnBtn;
-      if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
-        City.processTurn(state);
-        return;
-      }
-    }
-
-    // Build menu buttons
-    if (state._buildBtns) {
-      for (var b = 0; b < state._buildBtns.length; b++) {
-        var bb = state._buildBtns[b];
-        if (mx >= bb.x && mx <= bb.x + bb.w && my >= bb.y && my <= bb.y + bb.h) {
-          state.buildMode = (state.buildMode === bb.id) ? null : bb.id;
-          state.selectedTile = null;
-          return;
-        }
-      }
-    }
+    // Choice dialog blocks grid clicks (buttons handled by FA.ui)
+    if (state.choiceDialog) return;
 
     // Grid clicks (only in playable area)
-    var gridAreaHeight = cfg.gridHeight * cfg.tileSize;
-    if (my < gridAreaHeight) {
-      var gx = Math.floor(mx / cfg.tileSize);
-      var gy = Math.floor(my / cfg.tileSize);
+    var g = L.grid;
+    if (mx >= g.x && mx < g.x + g.w && my >= g.y && my < g.y + g.h) {
+      var gx = Math.floor((mx - g.x) / cfg.tileSize);
+      var gy = Math.floor((my - g.y) / cfg.tileSize);
       var tile = City.getTile(state.grid, gx, gy);
       if (!tile || !tile.discovered) return;
 
@@ -168,6 +140,7 @@
   });
 
   FA.setRender(function() {
+    FA.ui.frame();
     FA.draw.clear('#1a2a1e');
     FA.renderLayers();
   });

@@ -33,7 +33,62 @@
     },
     eventChance: 0.2,
     foodConsumptionRate: 5,
-    starvationPenalty: 2
+    starvationPenalty: 2,
+    heightScale: 6,
+    layout: 'sidebar'
+  });
+
+  // =====================
+  // LAYOUTS
+  // =====================
+
+  FA.register('config', 'layouts', {
+    classic: {
+      grid: { x: 0, y: 0, w: 800, h: 600 },
+      hud: { x: 0, y: 600, w: 1000, h: 140, direction: 'horizontal' },
+      resources: { x: 15, y: 612, direction: 'horizontal', spacing: 130 },
+      production: { x: 15, y: 630, direction: 'horizontal', spacing: 100 },
+      stats: { x: 540, y: 612, items: [
+        { label: 'Pop', key: 'pop', x: 0 },
+        { label: 'Happy', key: 'happy', x: 120 },
+        { label: 'Turn', key: 'turn', x: 230 }
+      ]},
+      endTurnBtn: { x: 865, y: 608, w: 120, h: 36 },
+      buildMenu: { x: 10, y: 652, direction: 'horizontal', btnW: 76, btnH: 82, gap: 4 },
+      tileInfo: { x: 800, y: 657, w: 185, h: 82 },
+      startTitle: { x: 500, y: 180, size: 48, align: 'center' },
+      startSubtitle: { x: 500, y: 250, size: 16, align: 'center' },
+      startInstructions: { x: 500, y: 320, spacing: 28, size: 14, align: 'center' },
+      startCta: { x: 500, y: 500, size: 22, align: 'center' },
+      endTitle: { x: 500, y: 180, size: 40, align: 'center' },
+      endScore: { x: 500, y: 260, size: 28, align: 'center' },
+      endStats: { x: 500, y: 320, spacing: 26, size: 14, align: 'center' },
+      endIdentity: { x: 500, y: 440, size: 16, align: 'center' },
+      endCta: { x: 500, y: 520, size: 18, align: 'center' }
+    },
+    sidebar: {
+      grid: { x: 0, y: 0, w: 800, h: 800 },
+      hud: { x: 800, y: 0, w: 200, h: 800, direction: 'vertical' },
+      resources: { x: 812, y: 12, direction: 'vertical', spacing: 22 },
+      production: { x: 812, y: 108, direction: 'vertical', spacing: 16 },
+      stats: { x: 812, y: 180, items: [
+        { label: 'Pop', key: 'pop', x: 0 },
+        { label: 'Happy', key: 'happy', x: 0 },
+        { label: 'Turn', key: 'turn', x: 0 }
+      ]},
+      endTurnBtn: { x: 812, y: 248, w: 176, h: 36 },
+      buildMenu: { x: 812, y: 300, direction: 'vertical', btnW: 176, btnH: 34, gap: 2 },
+      tileInfo: { x: 812, y: 710, w: 176, h: 80 },
+      startTitle: { x: 400, y: 220, size: 48, align: 'center' },
+      startSubtitle: { x: 400, y: 290, size: 16, align: 'center' },
+      startInstructions: { x: 400, y: 360, spacing: 28, size: 14, align: 'center' },
+      startCta: { x: 400, y: 540, size: 22, align: 'center' },
+      endTitle: { x: 400, y: 220, size: 40, align: 'center' },
+      endScore: { x: 400, y: 300, size: 28, align: 'center' },
+      endStats: { x: 400, y: 360, spacing: 26, size: 14, align: 'center' },
+      endIdentity: { x: 400, y: 480, size: 16, align: 'center' },
+      endCta: { x: 400, y: 560, size: 18, align: 'center' }
+    }
   });
 
   FA.register('config', 'colors', {
