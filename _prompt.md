@@ -204,7 +204,7 @@ On game end: calculate score, emit `game:over`, submit via `ForkArcade.submitSco
 ### Sprite Fallback
 Always provide fallback character + color:
 ```javascript
-FA.draw.sprite('buildings', 'hut', x, y, 32, 'H', '#8b4513');
+FA.draw.sprite('buildings', 'hut', x, y, 32, 'H', '#8b4513', 0);
 ```
 
 ### Color Coding

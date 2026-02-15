@@ -51,7 +51,7 @@ Turn-based city builder on a square grid with resource management, building plac
 - `FA.draw.text(str, x, y, opts)` — opts: `{ color, size, bold, align, baseline }`
 - `FA.draw.bar(x, y, w, h, fill, opts)` — progress bar
 - `FA.draw.circle(x, y, r, color)`
-- `FA.draw.sprite(category, key, x, y, size, fallbackChar, fallbackColor)`
+- `FA.draw.sprite(category, key, x, y, size, fallbackChar, fallbackColor, frame)`
 - `FA.draw.withAlpha(alpha, fn)` — temporary alpha
 - `FA.draw.withClip(x, y, w, h, fn)` — clipping region
 
